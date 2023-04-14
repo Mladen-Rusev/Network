@@ -1,18 +1,28 @@
 package com.example.limechaintask.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.UUID;
 
 @Entity
-public class Transaction {
+public class Transaction implements Serializable {
     @Id
     private String id;
+
     @ManyToOne
+    @JoinColumn(name = "sender_address", referencedColumnName = "address")
+    @JsonBackReference
     private Wallet sender;
+
     @ManyToOne
+    @JoinColumn(name = "receiver_address", referencedColumnName = "address")
+    @JsonBackReference
     private Wallet receiver;
+
     @Column(name = "amount")
     private BigDecimal amount;
 

@@ -68,7 +68,7 @@ public class WalletServiceImpl implements WalletService {
 
     @Transactional
     @EventListener(ApplicationReadyEvent.class)
-    public void doSomethingAfterStartup() {
+    public void generateNetworkActivity() {
         Random rnd = new Random();
         List<Wallet> walletsList = new ArrayList<>();
         for (int i = 0; i < 10; i++) {

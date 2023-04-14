@@ -1,7 +1,11 @@
 package com.example.limechaintask.models;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -13,12 +17,22 @@ import java.util.Random;
 public class Wallet {
     public static final BigDecimal STARTING_BALANCE = BigDecimal.valueOf(100);
     public static final String START_CHARS = "0x";
+
     @Id
     private final String address;
+
     @Column(name = "balance")
     private BigDecimal balance = STARTING_BALANCE;
-    @OneToMany(mappedBy = "id", fetch = FetchType.EAGER)
-    private List<Transaction> transactions = new ArrayList<>();
+
+    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    @LazyCollection(LazyCollectionOption.FALSE)
+    private List<Transaction> sendTransactions = new ArrayList<>();
+
+    @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    @LazyCollection(LazyCollectionOption.FALSE)
+    private List<Transaction> receiveTransactions = new ArrayList<>();
 
     public Wallet() {
         this.address = generateWalletAddress();
@@ -45,7 +59,15 @@ public class Wallet {
     }
 
     public void addTransaction(Transaction transaction) {
-        transactions.add(transaction);
+        sendTransactions.add(transaction);
+    }
+
+    @JsonIgnore
+    public List<Transaction> getAllTransactions() {
+        List<Transaction> result = new ArrayList<>();
+        result.addAll(sendTransactions);
+        result.addAll(receiveTransactions);
+        return result;
     }
 
     public String getAddress() {
@@ -58,6 +80,14 @@ public class Wallet {
 
     void setBalance(BigDecimal balance) {
         this.balance = balance;
+    }
+
+    public List<Transaction> getSendTransactions() {
+        return new ArrayList<>(sendTransactions);
+    }
+
+    public List<Transaction> getReceiveTransactions() {
+        return new ArrayList<>(receiveTransactions);
     }
 
     @Override
